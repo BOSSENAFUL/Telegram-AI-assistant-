@@ -3,12 +3,13 @@ import os
 from pyrogram import Client, filters
 
 # --- CONFIGURATION ---
+# API ID এবং Hash বসের নিজের প্যানেল থেকে নেওয়া
 API_ID = 33422392 
 API_HASH = "9b66ed5b9e6a307951b3a681c80f9d4b" 
 
 app = Client("CyberEnafulUserBot", api_id=API_ID, api_hash=API_HASH)
 
-# --- DATABASE FILES LIST ---
+# --- DATABASE FILES LIST (All 30 Files Included) ---
 FILES = [
     "cyber_enaful_file_1.json", "cyber_enaful_file_2.json", "cyber_enaful_file_3.json",
     "cyber_enaful_funny_master.json", "cyber_enaful_hot_aggressive.json", 
@@ -20,7 +21,10 @@ FILES = [
     "cyber_enaful_news_updates_v16.json", "cyber_enaful_digital_kingdom_v17.json",
     "cyber_enaful_ai_inner_core_v18.json", "cyber_enaful_tech_guide_v19.json",
     "cyber_enaful_lifestyle_mix_v20.json", "cyber_enaful_extreme_warning_v21.json",
-    "cyber_enaful_mega_love_v22_24.json"
+    "cyber_enaful_mega_love_v22_24.json", 
+    "cyber_enaful_file_25.json", "cyber_enaful_file_26.json", 
+    "cyber_enaful_file_27.json", "cyber_enaful_file_28.json", 
+    "cyber_enaful_file_29.json", "cyber_enaful_file_30.json"
 ]
 
 def load_data():
@@ -32,22 +36,26 @@ def load_data():
                     data = json.load(f)
                     master_data.update(data)
             except Exception as e:
-                print(f"Error loading {file_name}: {e}")
+                print(f"⚠️ Error loading {file_name}: {e}")
+        else:
+            print(f"❌ File Not Found: {file_name}")
     return master_data
 
+# ডেটা লোড করা হচ্ছে
 auto_replies = load_data()
 
-print("-" * 30)
-print("🔱 CYBER ENAFUL USERBOT ACTIVE")
-print(f"📊 Keywords Loaded: {len(auto_replies)}")
-print("🛡️ Filter: Private Inbox Only")
-print("-" * 30)
+print("-" * 35)
+print("🔱 CYBER ENAFUL USERBOT IS LIVE")
+print(f"📊 Total Keywords Loaded: {len(auto_replies)}")
+print("🛡️ Protection: Private Inbox Mode")
+print("-" * 35)
 
 @app.on_message(filters.private & filters.text & ~filters.me & ~filters.bot)
 async def inbox_handler(client, message):
     user_text = message.text.strip().lower()
     
     reply = None
+    # বসের ডাটাবেজ থেকে কি-ওয়ার্ড ম্যাচিং
     for key in auto_replies:
         if key.lower() in user_text:
             reply = auto_replies[key]
