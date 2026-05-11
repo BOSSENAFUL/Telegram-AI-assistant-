@@ -2,14 +2,13 @@ import json
 import os
 from pyrogram import Client, filters
 
-# --- বসের পার্সোনাল আইডি কনফিগারেশন ---
+# --- CONFIGURATION ---
 API_ID = 33422392 
 API_HASH = "9b66ed5b9e6a307951b3a681c80f9d4b" 
 
-# ইউজারবট ক্লায়েন্ট তৈরি
 app = Client("CyberEnafulUserBot", api_id=API_ID, api_hash=API_HASH)
 
-# ডাটাবেজ ফাইলের লিস্ট (২১টি মূল ফাইল + ২২-২৪ এর অ্যাডজাস্ট করা ফাইল)
+# --- DATABASE FILES LIST ---
 FILES = [
     "cyber_enaful_file_1.json", "cyber_enaful_file_2.json", "cyber_enaful_file_3.json",
     "cyber_enaful_funny_master.json", "cyber_enaful_hot_aggressive.json", 
@@ -24,31 +23,28 @@ FILES = [
     "cyber_enaful_mega_love_v22_24.json"
 ]
 
-def load_all_data():
+def load_data():
     master_data = {}
     for file_name in FILES:
         if os.path.exists(file_name):
             try:
                 with open(file_name, "r", encoding="utf-8") as f:
-                    content = f.read()
                     data = json.load(f)
                     master_data.update(data)
             except Exception as e:
-                print(f"⚠️ {file_name} লোড করতে সমস্যা: {e}")
+                print(f"Error loading {file_name}: {e}")
     return master_data
 
-# ডাটা লোড
-auto_replies = load_all_data()
+auto_replies = load_data()
 
-print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-print("🔱 CYBER ENAFUL USERBOT IS ACTIVE!")
-print(f"📊 Total Keywords: {len(auto_replies)}")
-print("🚫 No Groups | No Channels | No Bots")
-print("✅ Only Private Inbox")
-print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+print("-" * 30)
+print("🔱 CYBER ENAFUL USERBOT ACTIVE")
+print(f"📊 Keywords Loaded: {len(auto_replies)}")
+print("🛡️ Filter: Private Inbox Only")
+print("-" * 30)
 
 @app.on_message(filters.private & filters.text & ~filters.me & ~filters.bot)
-async def handle_private_inbox(client, message):
+async def inbox_handler(client, message):
     user_text = message.text.strip().lower()
     
     reply = None
@@ -61,7 +57,7 @@ async def handle_private_inbox(client, message):
         try:
             await message.reply_text(reply)
         except Exception as e:
-            print(f"মেসেজ পাঠাতে এরর: {e}")
+            print(f"Reply Error: {e}")
 
 if __name__ == "__main__":
     app.run()
