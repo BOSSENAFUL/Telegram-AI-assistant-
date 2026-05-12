@@ -3,15 +3,16 @@ import os
 from pyrogram import Client, filters
 
 # --- CONFIGURATION ---
-# API ID এবং Hash বসের নিজের প্যানেল থেকে নেওয়া
 API_ID = 33422392 
 API_HASH = "9b66ed5b9e6a307951b3a681c80f9d4b" 
 
 app = Client("CyberEnafulUserBot", api_id=API_ID, api_hash=API_HASH)
 
-# --- DATABASE FILES LIST (All 30 Files Included) ---
+# --- DATABASE FILES LIST (Names Corrected Based on Github) ---
 FILES = [
-    "cyber_enaful_file_1.json", "cyber_enaful_file_2.json", "cyber_enaful_file_3.json",
+    "cyber_enaful_all_in_one.json", 
+    "cyber_enaful_ultimate_v2.json", 
+    "cyber_enaful_file_3.json",
     "cyber_enaful_funny_master.json", "cyber_enaful_hot_aggressive.json", 
     "cyber_enaful_work_profile.json", "cyber_enaful_law_and_ethics.json", 
     "cyber_enaful_ultimate_master_v8.json", "cyber_enaful_legendary_v9.json", 
@@ -41,7 +42,6 @@ def load_data():
             print(f"❌ File Not Found: {file_name}")
     return master_data
 
-# ডেটা লোড করা হচ্ছে
 auto_replies = load_data()
 
 print("-" * 35)
@@ -55,7 +55,6 @@ async def inbox_handler(client, message):
     user_text = message.text.strip().lower()
     
     reply = None
-    # বসের ডাটাবেজ থেকে কি-ওয়ার্ড ম্যাচিং
     for key in auto_replies:
         if key.lower() in user_text:
             reply = auto_replies[key]
