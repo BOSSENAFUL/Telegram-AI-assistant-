@@ -12,7 +12,7 @@ API_HASH = "9b66ed5b9e6a307951b3a681c80f9d4b"
 
 app = Client("CyberEnafulUserBot", api_id=API_ID, api_hash=API_HASH)
 
-# --- DATABASE FILES LIST (৪০টি ফাইলসহ সব অটো লোড) ---
+# --- DATABASE FILES LIST ---
 FILES = [f"cyber_enaful_file_{i}.json" for i in range(1, 41)] + [
     "cyber_enaful_all_in_one.json", "cyber_enaful_ultimate_v2.json", 
     "cyber_enaful_funny_master.json", "cyber_enaful_hot_aggressive.json",
@@ -29,8 +29,8 @@ def show_banner():
     print("║   ███████╗██║ ╚████║██║  ██║██║     ╚██████╔╝███████╗║")
     print("║   ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚══════╝║")
     print("╚" + "═" * 50 + "╝")
-    print("\033[1;36m" + "      >>> CYBER ENAFUL MEGA SYSTEM v5.0 <<<")
-    print("\033[1;37m" + "   STATUS: ACTIVE | ALL FEATURES: FIXED | BRAND: CYBER ENAFUL")
+    print("\033[1;36m" + "      >>> CYBER ENAFUL MEGA SYSTEM v6.0 <<<")
+    print("\033[1;37m" + "   STATUS: ACTIVE | BROADCAST: GROUPS ONLY | BRAND: ENAFUL")
     print("\033[1;32m" + "═" * 52 + "\033[0m")
 
 def load_data():
@@ -51,62 +51,44 @@ def load_data():
 
 auto_replies = load_data()
 
-# --- [FIXED] ১ ঘণ্টা পরপর ব্রডকাস্ট (সব জায়গায়) ---
-async def hourly_broadcast_task():
-    await asyncio.sleep(10) # স্টার্টআপ ডিলে
+# --- [FIXED] ব্রডকাস্ট সিস্টেম (শুধুমাত্র গ্রুপে যাবে) ---
+async def group_broadcast_task(interval, list_key):
+    await asyncio.sleep(20) # স্টার্টআপ ডিলে
     while True:
-        broadcast_list = auto_replies.get("hourly_broadcast", [])
-        if broadcast_list:
-            msg = random.choice(broadcast_list)
+        msg_list = auto_replies.get(list_key, [])
+        if msg_list:
+            msg = random.choice(msg_list)
             async for dialog in app.get_dialogs():
-                try:
-                    await app.send_message(dialog.chat.id, msg)
-                    await asyncio.sleep(1.5)
-                except: continue
-        await asyncio.sleep(3600)
+                # চেক করবে এটা গ্রুপ কি না (SUPERGROUP বা GROUP)
+                if dialog.chat.type in [ChatType.GROUP, ChatType.SUPERGROUP]:
+                    try:
+                        await app.send_message(dialog.chat.id, msg)
+                        await asyncio.sleep(2.0) # স্প্যাম প্রোটেকশন
+                    except: continue
+        await asyncio.sleep(interval)
 
-# --- [FIXED] প্রতি মিনিটে ব্রডকাস্ট (ইনবক্স + গ্রুপ + চ্যানেল) ---
-async def minute_broadcast_task():
-    await asyncio.sleep(15) # স্টার্টআপ ডিলে
-    counter = 0
-    while True:
-        minute_list = auto_replies.get("minute_broadcast", [])
-        if minute_list:
-            msg = minute_list[counter % len(minute_list)]
-            counter += 1
-            async for dialog in app.get_dialogs():
-                try:
-                    await app.send_message(dialog.chat.id, msg)
-                    await asyncio.sleep(1.0)
-                except: continue
-        await asyncio.sleep(60)
-
-# --- [FEATURE 3: UPDATED] স্মার্ট + মেগা রিপ্লাই সিস্টেম ---
+# --- [FEATURE: RECOVERY] স্মার্ট + মেগা রিপ্লাই সিস্টেম ---
 @app.on_message(filters.text & ~filters.me & ~filters.bot)
 async def reply_handler(client, message):
     user_text = message.text.strip().lower()
-    
-    # ৪০ নম্বর ফাইলের সেই ২০টি বিশাল ডিজাইন (mega_replies) আগে চেক করবে
     mega_list = auto_replies.get("mega_replies", [])
     
-    if mega_list:
-        # কেউ যেকোনো কিছু লিখলেই (১টি অক্ষর হলেও) বিশাল ডিজাইন রিপ্লাই যাবে
+    reply_to_send = None
+
+    # ১. প্রথমে নির্দিষ্ট কী-ওয়ার্ড চেক করবে (পুরানো ফিচার ব্যাক)
+    for key, value in auto_replies.items():
+        if isinstance(key, str) and key.lower() in user_text:
+            reply_to_send = random.choice(value) if isinstance(value, list) else value
+            break
+    
+    # ২. যদি কী-ওয়ার্ড না মেলে তবে মেগা রিপ্লাই থেকে র‍্যান্ডম ডিজাইন নেবে
+    if not reply_to_send and mega_list:
         reply_to_send = random.choice(mega_list)
-    else:
-        # যদি মেগা রিপ্লাই না থাকে তবে সাধারণ রিপ্লাই
-        reply_to_send = None
-        for key, value in auto_replies.items():
-            if isinstance(value, str) and key.lower() in user_text:
-                reply_to_send = value
-                break
-        if not reply_to_send:
-            all_texts = [v for k, v in auto_replies.items() if isinstance(v, str)]
-            if all_texts: reply_to_send = random.choice(all_texts)
 
     if reply_to_send:
         try:
             await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.8)
             await message.reply_text(str(reply_to_send))
         except: pass
 
@@ -116,31 +98,31 @@ async def welcome_handler(client, message):
     welcome_list = auto_replies.get("welcome_list", [])
     if not welcome_list: return
     
-    inviter = message.from_user.mention if message.from_user else "অজানা লিজেন্ড"
-    
+    inviter = message.from_user.mention if message.from_user else "Legend"
     for member in message.new_chat_members:
         if not member.is_self:
-            user_mention = member.mention
-            group_name = message.chat.title
             selected_msg = random.choice(welcome_list)
             try:
-                # ডিজাইন ফরম্যাট ঠিক রাখা (replace ব্যবহার করে যাতে এরর না দেয়)
-                final_msg = selected_msg.replace("{user}", str(user_mention)).replace("{group}", str(group_name)).replace("{admin}", str(inviter))
+                final_msg = selected_msg.replace("{user}", str(member.mention)).replace("{group}", str(message.chat.title)).replace("{admin}", str(inviter))
                 await client.send_message(chat_id=message.chat.id, text=final_msg)
             except: 
                 await client.send_message(chat_id=message.chat.id, text=selected_msg)
 
-# --- হার্টবিট স্ট্যাটাস ---
+# --- স্ট্যাটাস চেক ---
 async def status_heartbeat():
     while True:
-        print(f"\033[1;32m[SYSTEM CHECK] {datetime.now().strftime('%H:%M:%S')} - CYBER ENAFUL IS LIVE! 🛡️\033[0m")
+        print(f"\033[1;32m[LIVE] {datetime.now().strftime('%H:%M:%S')} - CYBER ENAFUL IS RUNNING... 🛡️\033[0m")
         await asyncio.sleep(600)
 
 if __name__ == "__main__":
     show_banner()
-    print(f"📊 Total Keywords & Designs Synced: {len(auto_replies)} items.")
+    print(f"📊 Total Items Loaded: {len(auto_replies)}")
+    
     loop = asyncio.get_event_loop()
-    loop.create_task(hourly_broadcast_task())
-    loop.create_task(minute_broadcast_task())
+    # ১ ঘণ্টা পরপর গ্রুপ ব্রডকাস্ট
+    loop.create_task(group_broadcast_task(3600, "hourly_broadcast"))
+    # ২ মিনিট পরপর গ্রুপ ব্রডকাস্ট (মিনিট ব্রডকাস্টকে ২ মিনিট করা হয়েছে সেফটির জন্য)
+    loop.create_task(group_broadcast_task(120, "minute_broadcast"))
     loop.create_task(status_heartbeat())
+    
     app.run()
